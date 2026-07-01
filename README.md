@@ -1,184 +1,309 @@
-♻️ EcoSort — Smart Waste Management Simulation
+# ♻️ EcoSort — Smart Waste Management Simulation
 
-    An AI-powered smart waste sorting system simulation built with pure HTML, CSS, and JavaScript.
+> An AI-powered smart waste sorting system simulation built using **HTML, CSS, and JavaScript**.
 
-EcoSort Banner HTML CSS JavaScript Chart.js SDG
-📖 Overview
+![HTML](https://img.shields.io/badge/HTML5-Structure-orange?logo=html5)
+![CSS](https://img.shields.io/badge/CSS3-Styling-blue?logo=css3)
+![JavaScript](https://img.shields.io/badge/JavaScript-Logic-yellow?logo=javascript)
+![Chart.js](https://img.shields.io/badge/Chart.js-v4.4.1-red?logo=chartdotjs)
+![License](https://img.shields.io/badge/License-MIT-green)
 
-EcoSort is a browser-based simulation of an intelligent waste management system. It demonstrates how computer vision, IoT sensors, and automated decision engines can work together to classify waste, route it to the correct bin, and provide real-time analytics to municipality administrators.
+---
 
-    ⚠️ This is a prototype/demo — AI classification and sensor data are simulated. No real ML model or hardware is required.
+## 📖 Overview
 
-✨ Features
-🔍 Detect & Sort
+**EcoSort** is a browser-based simulation of an intelligent waste management system that demonstrates how **Artificial Intelligence, Computer Vision, IoT sensors, and automated decision-making** can be used to improve municipal waste management.
 
-    Upload a waste image (JPG, PNG, WEBP) via file picker or drag-and-drop
-    Capture a photo directly using your device camera
-    Simulated AI analysis with a visual loading state
-    Detection results including:
-        Waste type & category
-        Hazardous / Biodegradable / Recyclable flags
-        Confidence score with animated progress bar
-        Disposal instructions
-    Virtual sensor readings: Weight, Moisture, Conductivity, Toxicity
-    Animated smart bin that opens for the detected waste type
+The application simulates waste detection, sorting, smart bin operations, dashboard analytics, and customer services—all inside a single HTML file.
 
-📊 Admin Dashboard
+> **Note:** This project is a **simulation/prototype**. AI predictions and sensor readings are generated programmatically and do not require real machine learning models or hardware.
 
-    KPI cards: Total Waste Collected, Municipality Collected, Waste Sold, CO₂ Saved
-    Bar chart — waste collected by type (kg)
-    Donut chart — disposal method breakdown
-    Line chart — 6-month collection trend
-    Recent detections log table
-    Bin status monitoring table
+---
 
-👤 Customer Portal
+# ✨ Features
 
-    Schedule Pickup tab
-    Track Request tab
-    Waste Tips tab
+## 🔍 Smart Waste Detection
 
-ℹ️ About / SDG
+- Upload waste images
+- Drag & Drop support
+- Camera capture (localhost/HTTPS)
+- AI processing animation
+- Simulated AI classification
+- Confidence score
+- Waste category prediction
+- Disposal instructions
+- Animated smart bins
+- Virtual sensor readings
 
-    System component breakdown
-    UN Sustainable Development Goals alignment (SDG 11, 12, 13)
+### Simulated Sensors
 
-🗑️ Supported Waste Categories
-# 	Type 	Emoji 	Recyclable 	Hazardous 	Biodegradable
-1 	Cooking Waste 	🍳 	❌ 	❌ 	✅
-2 	Plastic 	🧴 	✅ 	❌ 	❌
-3 	Metal 	🔩 	✅ 	❌ 	❌
-4 	E-Waste 	💻 	✅ 	✅ 	❌
-5 	Biodegradable 	🌿 	❌ 	❌ 	✅
-6 	Non-Biodegradable 	🚫 	❌ 	❌ 	❌
-7 	Medical Waste 	🏥 	❌ 	✅ 	❌
-8 	Bio-Hazardous 	☣️ 	❌ 	✅ 	❌
-9 	Chemical-Hazardous 	⚗️ 	❌ 	✅ 	❌
-🛠️ Tech Stack
-Technology 	Purpose
-HTML5 	Structure & layout
-CSS3 	Styling, animations, responsive design
-Vanilla JavaScript 	Logic, DOM manipulation, simulated AI
-Chart.js v4.4.1 	Dashboard charts
-Tabler Icons v2.44 	Icon set
+- ⚖️ Weight
+- 💧 Moisture
+- ⚡ Conductivity
+- ☣️ Toxicity
 
-No build tools, no frameworks, no backend — just a single .html file.
-🚀 Getting Started
-Option 1 — Open Directly
+---
 
-Just double-click waste_management_simulation.html in your file explorer. It opens in any modern browser with no installation required.
-Option 2 — Local Server (recommended for camera access)
+## 🗑 Supported Waste Categories
 
-Camera capture requires a secure context (https:// or localhost). Serve locally with any of:
+| Waste Type | Recyclable | Hazardous | Biodegradable |
+|------------|------------|-----------|----------------|
+| 🍳 Cooking Waste | ❌ | ❌ | ✅ |
+| 🧴 Plastic | ✅ | ❌ | ❌ |
+| 🔩 Metal | ✅ | ❌ | ❌ |
+| 💻 E-Waste | ✅ | ✅ | ❌ |
+| 🌿 Biodegradable | ❌ | ❌ | ✅ |
+| 🚫 Non-Biodegradable | ❌ | ❌ | ❌ |
+| 🏥 Medical Waste | ❌ | ✅ | ❌ |
+| ☣️ Bio-Hazardous | ❌ | ✅ | ❌ |
+| ⚗️ Chemical Hazardous | ❌ | ✅ | ❌ |
 
-# Python
+---
+
+# 📊 Admin Dashboard
+
+The administrator dashboard provides live analytics including:
+
+- 📦 Total Waste Collected
+- 🏙 Municipality Collection
+- ♻️ Waste Sold
+- 🌱 CO₂ Saved
+- 📈 Monthly Collection Trend
+- 📊 Waste Type Distribution
+- 🍩 Disposal Method Breakdown
+- 📋 Recent Detection Logs
+- 🗑 Smart Bin Status Monitoring
+
+---
+
+# 👤 Customer Portal
+
+Users can:
+
+- Schedule waste pickup
+- Track pickup requests
+- View recycling tips
+- Learn proper waste disposal methods
+
+---
+
+# 🌍 Sustainable Development Goals
+
+EcoSort supports the following United Nations Sustainable Development Goals:
+
+| SDG | Description |
+|------|-------------|
+| 🏙 SDG 11 | Sustainable Cities and Communities |
+| ♻️ SDG 12 | Responsible Consumption and Production |
+| 🌱 SDG 13 | Climate Action |
+
+---
+
+# 🛠 Technology Stack
+
+| Technology | Purpose |
+|------------|---------|
+| HTML5 | Structure |
+| CSS3 | Styling & Responsive Design |
+| JavaScript | Logic & Simulation |
+| Chart.js | Dashboard Charts |
+| Tabler Icons | Icons |
+
+---
+
+# 📁 Project Structure
+
+```
+EcoSort/
+│
+├── waste_management_simulation.html
+│
+├── HTML Structure
+├── CSS Styling
+└── JavaScript Logic
+```
+
+Everything is contained inside a **single HTML file**.
+
+No frameworks.
+
+No backend.
+
+No build tools.
+
+---
+
+# 🚀 Getting Started
+
+## Option 1 — Open Directly
+
+Simply open
+
+```
+waste_management_simulation.html
+```
+
+in any modern browser.
+
+---
+
+## Option 2 — Local Server (Recommended)
+
+Camera functionality requires **localhost** or **HTTPS**.
+
+### Python
+
+```bash
 python -m http.server 8080
+```
 
-# Node.js
+### Node.js
+
+```bash
 npx serve .
+```
 
-# VS Code
-# Use the "Live Server" extension
+### VS Code
 
-Then open http://localhost:8080/waste_management_simulation.html.
-📁 Project Structure
+Use the **Live Server** extension.
 
-ecosort/
-└── waste_management_simulation.html   # Single self-contained file
-    ├── <style>                        # All CSS (variables, layout, animations)
-    ├── <body>                         # HTML structure (4 views)
-    └── <script>                       # All JS (AI sim, charts, camera, drag-drop)
+Open
 
-🖥️ Screenshots
-View 	Description
-Detect & Sort 	Upload image → AI analysis → bin opens
-Admin Dashboard 	KPIs, charts, tables
-Customer Portal 	Pickup scheduling & tracking
-About 	System overview & SDG alignment
-🔧 How It Works
+```
+http://localhost:8080/waste_management_simulation.html
+```
 
+---
+
+# ⚙️ How It Works
+
+```
 Image Upload / Camera
-        ↓
-  Simulated AI Model
-  (random waste type)
-        ↓
-  Virtual Sensor Readings
-  (weight, moisture, conductivity, toxicity)
-        ↓
-    Decision Engine
-        ↓
-  Correct Bin Opens + Level Increases
-        ↓
-  Dashboard Updated
+        │
+        ▼
+ Simulated AI Analysis
+        │
+        ▼
+ Virtual Sensor Readings
+        │
+        ▼
+ Decision Engine
+        │
+        ▼
+ Correct Bin Opens
+        │
+        ▼
+ Dashboard Updates
+```
 
-The analyzeWaste() function orchestrates the full pipeline with a 2.2s simulated processing delay to mimic a real computer vision model.
-📱 Responsive Design
+The `analyzeWaste()` function simulates AI processing with approximately **2.2 seconds** of analysis time before displaying the results.
 
-EcoSort is fully responsive:
+---
 
-    Desktop — 2-column detection layout, side-by-side dashboard panels
-    Tablet / Mobile — single-column stacked layout, 2-column KPI grid
+# 📱 Responsive Design
 
-🌱 SDG Alignment
-Goal 	Focus
-SDG 11 — Sustainable Cities & Communities 	Smart municipal waste infrastructure
-SDG 12 — Responsible Consumption & Production 	Reducing landfill via sorting & recycling
-SDG 13 — Climate Action 	CO₂ reduction tracking
-🔮 Future Enhancements
+EcoSort is optimized for:
 
-    Integrate real AI model (e.g., Anthropic Claude Vision API or TensorFlow.js)
-    Connect live IoT sensor data via WebSockets
-    Persist detection history with localStorage or a backend
-    Add user authentication for the admin dashboard
-    Export dashboard data as CSV / PDF
-    Multi-language support (i18n)
-    PWA support for offline use
+- 💻 Desktop
+- 📱 Mobile
+- 📟 Tablet
 
-🤝 Contributing
+The layout automatically adapts to different screen sizes.
 
-    Fork the repository
-    Create a feature branch: git checkout -b feature/your-feature
-    Commit your changes: git commit -m 'Add your feature'
-    Push to the branch: git push origin feature/your-feature
-    Open a Pull Request
+---
 
-📄 License
+# 🔮 Future Enhancements
 
-This project is open source and available under the MIT License.
-👤 Author
+- Real AI image classification
+- TensorFlow.js integration
+- Claude Vision / Gemini Vision support
+- Real IoT sensor integration
+- LocalStorage support
+- Database connectivity
+- User Authentication
+- Admin Login
+- Export Reports (PDF / CSV)
+- Dark Mode
+- Multi-language Support
+- Progressive Web App (PWA)
+- Cloud Deployment
 
-Built as a smart waste management simulation prototype.
-Contributions and feedback welcome! 🌍
+---
 
-Made with 💚 for a cleaner planet
-About
-No description, website, or topics provided.
-Resources
-Readme
-Activity
-Stars
-0 stars
-Watchers
-0 watching
-Forks
-0 forks
-Releases
-No releases published
-Create a new release
-Deployments 1
+# 📸 Screenshots
 
-    github-pages 1 hour ago
+Add screenshots here after deployment.
 
-Packages
-No packages published
-Publish your first package
-Contributors 1
+Example:
 
-    @dilshanijjero-18
-    dilshanijjero-18
+```
+screenshots/
+│
+├── detect-page.png
+├── dashboard.png
+├── customer-portal.png
+└── about-page.png
+```
 
-Languages
+---
 
-    HTML 100.0% 
+# 🤝 Contributing
 
-Footer
+Contributions are welcome!
+
+1. Fork the repository
+
+2. Create a feature branch
+
+```bash
+git checkout -b feature/new-feature
+```
+
+3. Commit changes
+
+```bash
+git commit -m "Add new feature"
+```
+
+4. Push to GitHub
+
+```bash
+git push origin feature/new-feature
+```
+
+5. Open a Pull Request
+
+---
+
+# 📄 License
+
+This project is licensed under the **MIT License**.
+
+---
+
+# 👩‍💻 Author
+
+**Dilshani J Jero**
+
+Final Year Student
+
+**Department of Computing and Cybersecurity**
+
+School of Quantum Science, Computing & AI
+
+Rathinam Global Deemed to be University
+
+GitHub:
+https://github.com/dilshanijjero-18
+
+---
+
+# ⭐ Show Your Support
+
+If you found this project useful, please consider giving it a ⭐ on GitHub.
+
+It helps others discover the project and motivates future improvements.
+
+---
+
+## 💚 Made with HTML, CSS & JavaScript for a Cleaner Planet 🌍
