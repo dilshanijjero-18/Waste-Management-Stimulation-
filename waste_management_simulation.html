@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EcoSort — Smart Waste Management</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --green-deep:#0a3d1f;--green-mid:#145a32;--green-bright:#1e8449;--green-light:#27ae60;
+    --green-pale:#d5f5e3;--green-accent:#2ecc71;
+    --leaf:#52be80;--soil:#795548;--sky:#e8f5e9;
+    --text:#1a1a1a;--text-sec:#4a5568;--text-muted:#718096;
+    --white:#ffffff;--card:#ffffff;--border:#e2e8f0;
+    --amber:#f59e0b;--red:#e53e3e;--blue:#3182ce;--purple:#6b46c1;
+    --font:'Segoe UI',system-ui,sans-serif;
+  }
+  body{font-family:var(--font);background:#f0f9f4;color:var(--text);min-height:100vh;overflow-x:hidden}
+
+  /* NATURE BACKGROUND */
+  .nature-bg{
+    position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;
+    background:linear-gradient(180deg,#c8e6c9 0%,#a5d6a7 30%,#81c784 60%,#66bb6a 100%);
+    overflow:hidden;
+  }
+  .sun{position:absolute;top:20px;right:80px;width:80px;height:80px;border-radius:50%;
+    background:radial-gradient(circle,#fff9c4,#ffee58);box-shadow:0 0 40px #ffee5880}
+  .cloud{position:absolute;background:rgba(255,255,255,0.7);border-radius:50px}
+  .c1{top:15px;left:10%;width:120px;height:35px}
+  .c2{top:25px;left:35%;width:90px;height:25px}
+  .c3{top:10px;left:60%;width:140px;height:38px}
+  .tree{position:absolute;bottom:0}
+  .tree svg{display:block}
+  .grass{position:absolute;bottom:0;left:0;right:0;height:80px;
+    background:linear-gradient(180deg,#388e3c,#2e7d32);border-radius:100% 100% 0 0}
+  .birds{position:absolute;top:40px;left:25%}
+
+  /* APP SHELL */
+  .app{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column}
+
+  /* HEADER */
+  header{
+    background:rgba(10,61,31,0.92);backdrop-filter:blur(8px);
+    color:white;padding:0 2rem;display:flex;align-items:center;
+    justify-content:space-between;height:64px;position:sticky;top:0;z-index:100;
+    border-bottom:2px solid var(--green-accent);
+  }
+  .logo{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:700}
+  .logo i{font-size:24px;color:var(--green-accent)}
+  .logo span em{color:var(--green-accent);font-style:normal}
+  nav{display:flex;gap:4px}
+  nav button{
+    background:transparent;border:none;color:rgba(255,255,255,0.8);
+    padding:8px 16px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:500;
+    transition:all 0.2s;display:flex;align-items:center;gap:6px
+  }
+  nav button:hover,nav button.active{background:rgba(46,204,113,0.2);color:white}
+  nav button.active{background:rgba(46,204,113,0.3);border-bottom:2px solid var(--green-accent)}
+  .sdg-badge{
+    background:rgba(46,204,113,0.2);border:1px solid var(--green-accent);
+    color:var(--green-accent);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600
+  }
+
+  /* VIEWS */
+  .view{display:none;padding:1.5rem 2rem;max-width:1400px;margin:0 auto;width:100%;flex:1}
+  .view.active{display:block}
+
+  /* HERO SECTION */
+  .hero{
+    background:rgba(255,255,255,0.92);backdrop-filter:blur(10px);
+    border-radius:20px;padding:2rem;margin-bottom:1.5rem;
+    border:1px solid rgba(46,204,113,0.3);text-align:center
+  }
+  .hero h1{font-size:2rem;color:var(--green-deep);margin-bottom:8px}
+  .hero p{color:var(--text-sec);font-size:1rem;max-width:600px;margin:0 auto 1.5rem}
+  .flow-steps{display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:wrap;margin:1.5rem 0}
+  .flow-step{
+    background:var(--green-pale);border:1.5px solid var(--green-bright);
+    color:var(--green-deep);padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;
+    display:flex;align-items:center;gap:6px;white-space:nowrap
+  }
+  .flow-arrow{color:var(--green-bright);font-size:18px;padding:0 4px}
+
+  /* DETECTION SECTION */
+  .detect-container{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem}
+  .panel{background:rgba(255,255,255,0.95);backdrop-filter:blur(8px);border-radius:16px;padding:1.5rem;border:1px solid var(--border)}
+  .panel h2{font-size:16px;font-weight:600;color:var(--green-deep);margin-bottom:1rem;display:flex;align-items:center;gap:8px}
+  .panel h2 i{color:var(--green-bright)}
+
+  /* UPLOAD ZONE */
+  .upload-zone{
+    border:2.5px dashed var(--green-light);border-radius:12px;padding:2rem;
+    text-align:center;cursor:pointer;transition:all 0.2s;
+    background:var(--green-pale);min-height:180px;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:12px
+  }
+  .upload-zone:hover{background:#c1f0d5;border-color:var(--green-bright)}
+  .upload-zone i{font-size:40px;color:var(--green-bright)}
+  .upload-zone p{color:var(--text-sec);font-size:14px}
+  .upload-zone strong{color:var(--green-deep)}
+  #fileInput{display:none}
+
+  .preview-area{margin-top:1rem;display:none}
+  .preview-area img{width:100%;max-height:200px;object-fit:cover;border-radius:10px;border:2px solid var(--green-light)}
+
+  .cam-btn{
+    background:var(--green-bright);color:white;border:none;padding:10px 20px;
+    border-radius:10px;cursor:pointer;font-size:14px;font-weight:600;
+    display:flex;align-items:center;gap:8px;margin:8px auto 0;transition:all 0.2s
+  }
+  .cam-btn:hover{background:var(--green-deep)}
+
+  .analyze-btn{
+    width:100%;background:linear-gradient(135deg,var(--green-bright),var(--green-deep));
+    color:white;border:none;padding:14px;border-radius:12px;cursor:pointer;
+    font-size:15px;font-weight:700;margin-top:1rem;transition:all 0.2s;
+    display:flex;align-items:center;justify-content:center;gap:8px
+  }
+  .analyze-btn:hover{opacity:0.9;transform:translateY(-1px)}
+  .analyze-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+
+  /* RESULT PANEL */
+  .result-card{display:none;margin-top:1rem;border-radius:12px;padding:1.2rem;border:2px solid}
+  .result-card.show{display:block}
+  .waste-type-badge{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:8px 16px;border-radius:20px;font-size:14px;font-weight:700;margin-bottom:12px
+  }
+  .result-detail{display:flex;justify-content:space-between;align-items:center;margin:6px 0;font-size:13px}
+  .result-detail .label{color:var(--text-sec)}
+  .result-detail .value{font-weight:600}
+  .confidence-bar{height:8px;border-radius:4px;background:#e2e8f0;margin-top:4px}
+  .confidence-fill{height:100%;border-radius:4px;transition:width 1s ease}
+
+  /* SENSOR PANEL */
+  .sensor-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .sensor-item{
+    background:var(--green-pale);border-radius:10px;padding:12px;
+    border:1px solid rgba(46,204,113,0.3)
+  }
+  .sensor-label{font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
+  .sensor-value{font-size:18px;font-weight:700;color:var(--green-deep);margin-top:4px}
+  .sensor-unit{font-size:11px;color:var(--text-sec);font-weight:400}
+  .sensor-bar{height:5px;border-radius:3px;background:#c8e6c9;margin-top:6px;overflow:hidden}
+  .sensor-fill{height:100%;border-radius:3px;background:var(--green-bright);transition:width 0.8s}
+
+  /* BINS SECTION */
+  .bins-section{margin-bottom:1.5rem}
+  .bins-section h2{font-size:18px;font-weight:600;color:var(--green-deep);margin-bottom:1rem;display:flex;align-items:center;gap:8px}
+  .bins-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}
+  .bin-card{
+    background:rgba(255,255,255,0.95);border-radius:14px;padding:1rem;text-align:center;
+    border:2px solid var(--border);transition:all 0.3s;cursor:pointer
+  }
+  .bin-card.active{transform:translateY(-6px);box-shadow:0 12px 24px rgba(0,0,0,0.12)}
+  .bin-card.opening{animation:binOpen 0.6s ease forwards}
+  @keyframes binOpen{0%{transform:translateY(0)}30%{transform:translateY(-10px)}60%{transform:translateY(-6px)}100%{transform:translateY(-6px)}}
+  .bin-icon{font-size:36px;margin-bottom:8px;display:block;transition:transform 0.3s}
+  .bin-card.active .bin-icon{animation:bounce 0.5s ease}
+  @keyframes bounce{0%,100%{transform:scale(1)}50%{transform:scale(1.3)}}
+  .bin-name{font-size:11px;font-weight:700;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px}
+  .bin-level{font-size:10px;color:var(--text-sec);margin-bottom:6px}
+  .bin-progress{height:6px;border-radius:3px;background:#f0f0f0;overflow:hidden}
+  .bin-fill{height:100%;border-radius:3px;transition:width 1s ease}
+  .bin-status{font-size:10px;margin-top:6px;padding:3px 8px;border-radius:10px;display:inline-block}
+
+  /* WASTE TYPE COLORS */
+  .wt-cooking{--wt-c:#e67e22;--wt-bg:#fef3e2;--wt-border:#f5cba7}
+  .wt-plastic{--wt-c:#3498db;--wt-bg:#eaf4fb;--wt-border:#aed6f1}
+  .wt-metal{--wt-c:#7f8c8d;--wt-bg:#f2f3f4;--wt-border:#d5dbdb}
+  .wt-ewaste{--wt-c:#8e44ad;--wt-bg:#f5eef8;--wt-border:#d7bde2}
+  .wt-biodeg{--wt-c:#27ae60;--wt-bg:#eafaf1;--wt-border:#a9dfbf}
+  .wt-nonbiodeg{--wt-c:#e74c3c;--wt-bg:#fdedec;--wt-border:#f5b7b1}
+  .wt-medical{--wt-c:#c0392b;--wt-bg:#fdf2f2;--wt-border:#e8b4b8}
+  .wt-biohaz{--wt-c:#d35400;--wt-bg:#fef5e7;--wt-border:#f0b27a}
+  .wt-nonbiohaz{--wt-c:#2c3e50;--wt-bg:#eaecee;--wt-border:#aab7b8}
+
+  /* DASHBOARD */
+  .dash-header{background:rgba(10,61,31,0.95);color:white;border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;display:flex;justify-content:space-between;align-items:center}
+  .dash-header h1{font-size:20px;font-weight:700}
+  .dash-header p{font-size:13px;opacity:0.7;margin-top:4px}
+  .admin-badge{background:var(--green-accent);color:var(--green-deep);padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700}
+  .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:1.5rem}
+  .kpi-card{background:rgba(255,255,255,0.95);border-radius:14px;padding:1.2rem;border:1px solid var(--border)}
+  .kpi-label{font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+  .kpi-value{font-size:26px;font-weight:700;color:var(--green-deep)}
+  .kpi-sub{font-size:12px;color:var(--text-sec);margin-top:2px}
+  .kpi-trend{display:flex;align-items:center;gap:4px;font-size:12px;margin-top:6px}
+  .trend-up{color:#27ae60}.trend-down{color:#e53e3e}
+
+  .dash-grid{display:grid;grid-template-columns:2fr 1fr;gap:1.5rem;margin-bottom:1.5rem}
+  .chart-panel{background:rgba(255,255,255,0.95);border-radius:14px;padding:1.2rem;border:1px solid var(--border)}
+  .chart-panel h3{font-size:14px;font-weight:600;color:var(--green-deep);margin-bottom:1rem;display:flex;align-items:center;gap:8px}
+
+  .table-panel{background:rgba(255,255,255,0.95);border-radius:14px;padding:1.2rem;border:1px solid var(--border);margin-bottom:1.5rem}
+  .table-panel h3{font-size:14px;font-weight:600;color:var(--green-deep);margin-bottom:1rem;display:flex;align-items:center;gap:8px}
+  .data-table{width:100%;border-collapse:collapse;font-size:13px}
+  .data-table th{text-align:left;padding:8px 12px;background:var(--green-pale);color:var(--green-deep);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.5px}
+  .data-table th:first-child{border-radius:8px 0 0 8px}
+  .data-table th:last-child{border-radius:0 8px 8px 0}
+  .data-table td{padding:10px 12px;border-bottom:1px solid #f0f0f0;vertical-align:middle}
+  .data-table tr:hover td{background:#f9fffe}
+  .data-table tr:last-child td{border-bottom:none}
+  .status-pill{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600}
+  .pill-collected{background:#d5f5e3;color:#1e8449}
+  .pill-pending{background:#fef3e2;color:#e67e22}
+  .pill-sold{background:#e8f4fd;color:#2980b9}
+  .pill-full{background:#fdedec;color:#e74c3c}
+  .pill-ok{background:#d5f5e3;color:#1e8449}
+  .pill-warn{background:#fef3e2;color:#e67e22}
+
+  /* BIN STATUS TABLE */
+  .bin-status-dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:6px}
+
+  /* CUSTOMER TAB */
+  .tab-row{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap}
+  .tab-btn{
+    padding:7px 16px;border-radius:8px;border:1.5px solid var(--green-light);
+    background:transparent;color:var(--green-bright);cursor:pointer;font-size:13px;font-weight:600;transition:all 0.2s
+  }
+  .tab-btn.active{background:var(--green-bright);color:white;border-color:var(--green-bright)}
+
+  /* ABOUT */
+  .about-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.2rem;margin-bottom:1.5rem}
+  .about-card{background:rgba(255,255,255,0.95);border-radius:14px;padding:1.5rem;border:1px solid var(--border)}
+  .about-card h3{font-size:15px;font-weight:600;color:var(--green-deep);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+  .about-card p{font-size:13px;color:var(--text-sec);line-height:1.6}
+  .sdg-box{background:linear-gradient(135deg,#1e8449,#0a3d1f);color:white;border-radius:14px;padding:1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1.5rem}
+  .sdg-num{font-size:60px;font-weight:900;opacity:0.3;line-height:1}
+  .sdg-content h2{font-size:18px;font-weight:700;margin-bottom:6px}
+  .sdg-content p{font-size:13px;opacity:0.85;line-height:1.6}
+
+  /* CAMERA */
+  #camModal{
+    display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+    background:rgba(0,0,0,0.8);z-index:200;align-items:center;justify-content:center
+  }
+  #camModal.open{display:flex}
+  .cam-box{background:white;border-radius:16px;overflow:hidden;width:480px;max-width:95vw}
+  .cam-header{background:var(--green-deep);color:white;padding:1rem 1.2rem;display:flex;align-items:center;justify-content:space-between}
+  #videoEl{width:100%;height:280px;object-fit:cover;background:#000}
+  .cam-controls{padding:1rem;display:flex;gap:10px;justify-content:center}
+  .capture-btn{background:var(--green-bright);color:white;border:none;padding:10px 24px;border-radius:10px;cursor:pointer;font-weight:600;font-size:14px}
+  .close-btn{background:transparent;border:none;color:white;cursor:pointer;font-size:20px}
+
+  /* LOADING */
+  .loader{display:none;text-align:center;padding:2rem}
+  .loader.show{display:block}
+  .spinner{display:inline-block;width:36px;height:36px;border:4px solid var(--green-pale);border-top:4px solid var(--green-bright);border-radius:50%;animation:spin 0.8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .loader p{margin-top:10px;color:var(--text-sec);font-size:14px}
+
+  /* NOTIFICATION */
+  .notif{
+    position:fixed;top:80px;right:20px;z-index:300;
+    background:var(--green-deep);color:white;padding:12px 20px;border-radius:12px;
+    display:flex;align-items:center;gap:10px;font-size:14px;font-weight:500;
+    transform:translateX(200%);transition:transform 0.3s;max-width:300px;
+    border-left:4px solid var(--green-accent)
+  }
+  .notif.show{transform:translateX(0)}
+
+  @media(max-width:768px){
+    .detect-container,.dash-grid{grid-template-columns:1fr}
+    .flow-steps{gap:4px}
+    .flow-step{font-size:10px;padding:6px 10px}
+    header{padding:0 1rem}
+    .view{padding:1rem}
+    .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  }
+</style>
+</head>
+<body>
+
+<!-- NATURE BACKGROUND -->
+<div class="nature-bg" aria-hidden="true">
+  <div class="sun"></div>
+  <div class="cloud c1"></div>
+  <div class="cloud c2"></div>
+  <div class="cloud c3"></div>
+  <!-- SVG Trees -->
+  <div class="tree" style="left:2%;bottom:0">
+    <svg width="70" height="120" viewBox="0 0 70 120"><polygon points="35,0 70,80 0,80" fill="#2e7d32"/><polygon points="35,20 65,90 5,90" fill="#388e3c"/><rect x="28" y="80" width="14" height="40" fill="#5d4037"/></svg>
+  </div>
+  <div class="tree" style="left:6%;bottom:0">
+    <svg width="50" height="90" viewBox="0 0 50 90"><polygon points="25,0 50,60 0,60" fill="#1b5e20"/><rect x="20" y="58" width="10" height="32" fill="#4e342e"/></svg>
+  </div>
+  <div class="tree" style="right:3%;bottom:0">
+    <svg width="80" height="130" viewBox="0 0 80 130"><polygon points="40,0 80,85 0,85" fill="#2e7d32"/><polygon points="40,25 72,95 8,95" fill="#43a047"/><rect x="32" y="85" width="16" height="45" fill="#5d4037"/></svg>
+  </div>
+  <div class="tree" style="right:8%;bottom:0">
+    <svg width="55" height="100" viewBox="0 0 55 100"><polygon points="27,0 55,68 0,68" fill="#388e3c"/><rect x="22" y="66" width="11" height="34" fill="#4e342e"/></svg>
+  </div>
+  <div class="tree" style="left:18%;bottom:0;opacity:0.6">
+    <svg width="40" height="75" viewBox="0 0 40 75"><polygon points="20,0 40,50 0,50" fill="#1b5e20"/><rect x="16" y="48" width="8" height="27" fill="#6d4c41"/></svg>
+  </div>
+  <div class="tree" style="right:20%;bottom:0;opacity:0.6">
+    <svg width="45" height="80" viewBox="0 0 45 80"><polygon points="22,0 45,55 0,55" fill="#2e7d32"/><rect x="18" y="53" width="9" height="27" fill="#6d4c41"/></svg>
+  </div>
+  <div class="grass"></div>
+  <!-- Birds -->
+  <div class="birds">
+    <svg width="60" height="20" viewBox="0 0 60 20"><path d="M0,10 Q5,2 10,10" stroke="#555" fill="none" stroke-width="1.5"/><path d="M14,8 Q19,0 24,8" stroke="#555" fill="none" stroke-width="1.5"/><path d="M40,6 Q45,0 50,6" stroke="#555" fill="none" stroke-width="1.5"/></svg>
+  </div>
+</div>
+
+<!-- CAMERA MODAL -->
+<div id="camModal">
+  <div class="cam-box">
+    <div class="cam-header">
+      <span style="display:flex;align-items:center;gap:8px"><i class="ti ti-camera"></i> Capture Waste Image</span>
+      <button class="close-btn" onclick="closeCamera()"><i class="ti ti-x"></i></button>
+    </div>
+    <video id="videoEl" autoplay playsinline></video>
+    <div class="cam-controls">
+      <button class="capture-btn" onclick="capturePhoto()"><i class="ti ti-camera"></i> Capture</button>
+      <button class="capture-btn" style="background:#e74c3c" onclick="closeCamera()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTIFICATION -->
+<div class="notif" id="notif">
+  <i class="ti ti-check-circle"></i>
+  <span id="notifMsg">Waste detected successfully!</span>
+</div>
+
+<!-- APP -->
+<div class="app">
+  <header>
+    <div class="logo">
+      <i class="ti ti-leaf"></i>
+      <span>Eco<em>Sort</em> AI</span>
+    </div>
+    <nav>
+      <button class="active" onclick="showView('detect',this)"><i class="ti ti-scan"></i> Detect</button>
+      <button onclick="showView('dashboard',this)"><i class="ti ti-layout-dashboard"></i> Dashboard</button>
+      <button onclick="showView('about',this)"><i class="ti ti-info-circle"></i> About</button>
+    </nav>
+    <div class="sdg-badge">SDG 11 &amp; 12</div>
+  </header>
+
+  <!-- DETECT VIEW -->
+  <div class="view active" id="view-detect">
+    <div class="hero">
+      <h1>Smart Waste Detection &amp; Sorting</h1>
+      <p>Upload or capture a waste image — our AI identifies the type, category, and routes it to the correct bin automatically</p>
+      <div class="flow-steps">
+        <div class="flow-step"><i class="ti ti-photo"></i> Image Input</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step"><i class="ti ti-cpu"></i> Vision AI</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step"><i class="ti ti-activity"></i> Sensor Values</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step"><i class="ti ti-brain"></i> Decision Engine</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step"><i class="ti ti-archive"></i> Bin Opens</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step"><i class="ti ti-chart-bar"></i> Dashboard</div>
+      </div>
+    </div>
+
+    <div class="detect-container">
+      <!-- LEFT: Upload + Camera -->
+      <div class="panel">
+        <h2><i class="ti ti-upload"></i> Waste Image Input</h2>
+        <div class="upload-zone" onclick="document.getElementById('fileInput').click()" id="uploadZone">
+          <i class="ti ti-cloud-upload"></i>
+          <div>
+            <strong>Click to upload</strong> or drag &amp; drop
+            <p>Supports JPG, PNG, WEBP</p>
+          </div>
+        </div>
+        <input type="file" id="fileInput" accept="image/*" onchange="handleFileUpload(event)">
+        <div class="preview-area" id="previewArea">
+          <img id="previewImg" src="" alt="Uploaded waste image">
+        </div>
+        <div style="text-align:center;margin-top:10px">
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:8px">— or —</p>
+          <button class="cam-btn" onclick="openCamera()">
+            <i class="ti ti-camera"></i> Take Photo with Camera
+          </button>
+        </div>
+        <button class="analyze-btn" onclick="analyzeWaste()" id="analyzeBtn" disabled>
+          <i class="ti ti-brain"></i> Analyze &amp; Sort Waste
+        </button>
+      </div>
+
+      <!-- RIGHT: Results -->
+      <div class="panel">
+        <h2><i class="ti ti-report-analytics"></i> Detection Results</h2>
+
+        <div id="loadingAI" class="loader">
+          <div class="spinner"></div>
+          <p>AI analyzing waste image...</p>
+          <p style="font-size:12px;margin-top:4px;color:var(--text-muted)">Running computer vision model</p>
+        </div>
+
+        <div id="resultArea">
+          <div id="noResult" style="text-align:center;padding:2rem;color:var(--text-muted)">
+            <i class="ti ti-camera-off" style="font-size:40px;display:block;margin-bottom:12px"></i>
+            Upload or capture an image to begin waste detection
+          </div>
+
+          <div id="resultCard" class="result-card" style="display:none">
+            <div class="waste-type-badge" id="typeBadge"></div>
+            <div style="margin-bottom:12px">
+              <div class="result-detail">
+                <span class="label">Category</span>
+                <span class="value" id="resCategory">—</span>
+              </div>
+              <div class="result-detail">
+                <span class="label">Hazardous</span>
+                <span class="value" id="resHazard">—</span>
+              </div>
+              <div class="result-detail">
+                <span class="label">Biodegradable</span>
+                <span class="value" id="resBio">—</span>
+              </div>
+              <div class="result-detail">
+                <span class="label">Recyclable</span>
+                <span class="value" id="resRecycle">—</span>
+              </div>
+              <div class="result-detail">
+                <span class="label">Confidence</span>
+                <span class="value" id="resConf">—</span>
+              </div>
+              <div class="confidence-bar"><div class="confidence-fill" id="confFill" style="width:0%"></div></div>
+            </div>
+            <div style="background:var(--green-pale);border-radius:10px;padding:12px;margin-top:8px">
+              <p style="font-size:12px;font-weight:700;color:var(--green-deep);margin-bottom:4px"><i class="ti ti-info-circle"></i> Disposal Instruction</p>
+              <p style="font-size:12px;color:var(--text-sec)" id="resInstruction">—</p>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:1.5rem">
+          <h2 style="margin-bottom:1rem"><i class="ti ti-activity"></i> Virtual Sensor Readings</h2>
+          <div class="sensor-grid" id="sensorGrid">
+            <div class="sensor-item">
+              <div class="sensor-label">Weight</div>
+              <div class="sensor-value" id="sWeight">— <span class="sensor-unit">g</span></div>
+              <div class="sensor-bar"><div class="sensor-fill" id="sWeightBar" style="width:0%"></div></div>
+            </div>
+            <div class="sensor-item">
+              <div class="sensor-label">Moisture</div>
+              <div class="sensor-value" id="sMoist">— <span class="sensor-unit">%</span></div>
+              <div class="sensor-bar"><div class="sensor-fill" id="sMoistBar" style="width:0%"></div></div>
+            </div>
+            <div class="sensor-item">
+              <div class="sensor-label">Conductivity</div>
+              <div class="sensor-value" id="sCond">— <span class="sensor-unit">mS</span></div>
+              <div class="sensor-bar"><div class="sensor-fill" id="sCondBar" style="width:0%"></div></div>
+            </div>
+            <div class="sensor-item">
+              <div class="sensor-label">Toxicity</div>
+              <div class="sensor-value" id="sTox">— <span class="sensor-unit">ppm</span></div>
+              <div class="sensor-bar"><div class="sensor-fill" id="sToxBar" style="width:0%"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BINS -->
+    <div class="bins-section">
+      <div class="panel">
+        <h2><i class="ti ti-archive"></i> Smart Waste Bins — Decision Engine Output</h2>
+        <div class="bins-grid" id="binsGrid">
+          <!-- Bins rendered by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD VIEW -->
+  <div class="view" id="view-dashboard">
+    <div class="dash-header">
+      <div>
+        <h1><i class="ti ti-layout-dashboard"></i> Admin Dashboard</h1>
+        <p>Municipality Waste Management — Real-time Analytics</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <span class="admin-badge"><i class="ti ti-shield-check"></i> Admin</span>
+        <button onclick="refreshDashboard()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:white;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px"><i class="ti ti-refresh"></i> Refresh</button>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label"><i class="ti ti-recycle" style="color:var(--green-bright)"></i> Total Waste Collected</div>
+        <div class="kpi-value" id="kpiTotal">2,847 kg</div>
+        <div class="kpi-sub">This month</div>
+        <div class="kpi-trend trend-up"><i class="ti ti-trending-up"></i> +12% vs last month</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label"><i class="ti ti-building-community" style="color:var(--blue)"></i> Municipality Collected</div>
+        <div class="kpi-value" id="kpiMuni">1,234 kg</div>
+        <div class="kpi-sub">By municipal teams</div>
+        <div class="kpi-trend trend-up"><i class="ti ti-trending-up"></i> 43% of total</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label"><i class="ti ti-cash" style="color:var(--amber)"></i> Waste Sold</div>
+        <div class="kpi-value" id="kpiSold">892 kg</div>
+        <div class="kpi-sub">₹44,600 revenue</div>
+        <div class="kpi-trend trend-up"><i class="ti ti-trending-up"></i> +8% this week</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label"><i class="ti ti-archive" style="color:var(--purple)"></i> Balance in Storage</div>
+        <div class="kpi-value" id="kpiBalance">721 kg</div>
+        <div class="kpi-sub">Awaiting pickup / sale</div>
+        <div class="kpi-trend trend-down"><i class="ti ti-trending-down"></i> 25% of collected</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label"><i class="ti ti-trash-x" style="color:var(--red)"></i> Bins Not Emptied</div>
+        <div class="kpi-value" id="kpiBinsFull" style="color:var(--red)">3</div>
+        <div class="kpi-sub">Need immediate action</div>
+        <div class="kpi-trend trend-down"><i class="ti ti-alert-triangle"></i> Attention required</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label"><i class="ti ti-users" style="color:var(--green-bright)"></i> Active Buyers</div>
+        <div class="kpi-value">18</div>
+        <div class="kpi-sub">Registered customers</div>
+        <div class="kpi-trend trend-up"><i class="ti ti-trending-up"></i> 3 new this month</div>
+      </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="dash-grid">
+      <div class="chart-panel">
+        <h3><i class="ti ti-chart-bar" style="color:var(--green-bright)"></i> Waste Collected by Type (kg)</h3>
+        <div style="position:relative;height:250px">
+          <canvas id="wasteTypeChart" role="img" aria-label="Bar chart showing waste collected by type in kilograms">Waste type distribution chart</canvas>
+        </div>
+      </div>
+      <div class="chart-panel">
+        <h3><i class="ti ti-chart-donut" style="color:var(--green-bright)"></i> Disposal Breakdown</h3>
+        <div style="position:relative;height:250px">
+          <canvas id="disposalChart" role="img" aria-label="Donut chart showing waste disposal breakdown">Disposal breakdown chart</canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABS for tables -->
+    <div class="table-panel">
+      <div class="tab-row">
+        <button class="tab-btn active" onclick="showTab('bins',this)"><i class="ti ti-archive"></i> Bin Status</button>
+        <button class="tab-btn" onclick="showTab('municipality',this)"><i class="ti ti-building-community"></i> Municipality Records</button>
+        <button class="tab-btn" onclick="showTab('sales',this)"><i class="ti ti-cash"></i> Sales Records</button>
+        <button class="tab-btn" onclick="showTab('customers',this)"><i class="ti ti-users"></i> Customer Details</button>
+      </div>
+
+      <!-- BIN STATUS TABLE -->
+      <div id="tab-bins">
+        <h3 style="font-size:14px;font-weight:600;color:var(--green-deep);margin-bottom:1rem"><i class="ti ti-archive"></i> Bin Status — Which bins have NOT been emptied</h3>
+        <table class="data-table">
+          <thead><tr><th>Bin ID</th><th>Waste Type</th><th>Fill Level</th><th>Last Emptied</th><th>Location</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td><span class="bin-status-dot" style="background:#e74c3c"></span>BIN-003</td><td>Medical Waste</td><td><div style="display:flex;align-items:center;gap:8px"><div style="width:80px;height:8px;border-radius:4px;background:#f0f0f0;overflow:hidden"><div style="width:92%;height:100%;background:#e74c3c;border-radius:4px"></div></div>92%</div></td><td>3 days ago</td><td>Block C, Gate 2</td><td><span class="status-pill pill-full">FULL — Urgent</span></td></tr>
+            <tr><td><span class="bin-status-dot" style="background:#e67e22"></span>BIN-007</td><td>E-Waste</td><td><div style="display:flex;align-items:center;gap:8px"><div style="width:80px;height:8px;border-radius:4px;background:#f0f0f0;overflow:hidden"><div style="width:85%;height:100%;background:#e67e22;border-radius:4px"></div></div>85%</div></td><td>5 days ago</td><td>Block A, IT Room</td><td><span class="status-pill pill-warn">HIGH — Schedule</span></td></tr>
+            <tr><td><span class="bin-status-dot" style="background:#e67e22"></span>BIN-012</td><td>Non-Biodegradable Hazardous</td><td><div style="display:flex;align-items:center;gap:8px"><div style="width:80px;height:8px;border-radius:4px;background:#f0f0f0;overflow:hidden"><div style="width:80%;height:100%;background:#e67e22;border-radius:4px"></div></div>80%</div></td><td>4 days ago</td><td>Block D, Storage</td><td><span class="status-pill pill-warn">HIGH — Schedule</span></td></tr>
+            <tr><td><span class="bin-status-dot" style="background:#27ae60"></span>BIN-001</td><td>Cooking Waste</td><td><div style="display:flex;align-items:center;gap:8px"><div style="width:80px;height:8px;border-radius:4px;background:#f0f0f0;overflow:hidden"><div style="width:45%;height:100%;background:#27ae60;border-radius:4px"></div></div>45%</div></td><td>Today</td><td>Cafeteria, Block B</td><td><span class="status-pill pill-ok">OK</span></td></tr>
+            <tr><td><span class="bin-status-dot" style="background:#27ae60"></span>BIN-002</td><td>Plastic Waste</td><td><div style="display:flex;align-items:center;gap:8px"><div style="width:80px;height:8px;border-radius:4px;background:#f0f0f0;overflow:hidden"><div style="width:60%;height:100%;background:#3498db;border-radius:4px"></div></div>60%</div></td><td>Yesterday</td><td>Main Lobby</td><td><span class="status-pill pill-ok">OK</span></td></tr>
+            <tr><td><span class="bin-status-dot" style="background:#27ae60"></span>BIN-005</td><td>Metal Waste</td><td><div style="display:flex;align-items:center;gap:8px"><div style="width:80px;height:8px;border-radius:4px;background:#f0f0f0;overflow:hidden"><div style="width:30%;height:100%;background:#7f8c8d;border-radius:4px"></div></div>30%</div></td><td>Today</td><td>Workshop Area</td><td><span class="status-pill pill-ok">OK</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- MUNICIPALITY TABLE -->
+      <div id="tab-municipality" style="display:none">
+        <h3 style="font-size:14px;font-weight:600;color:var(--green-deep);margin-bottom:1rem"><i class="ti ti-building-community"></i> Municipality &amp; Organization Collection Records</h3>
+        <table class="data-table">
+          <thead><tr><th>Collection ID</th><th>Organization</th><th>Date</th><th>Waste Type</th><th>Amount (kg)</th><th>Vehicle</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>MUN-2401</td><td>Chennai Municipal Corp.</td><td>27 Jun 2026</td><td>Mixed Solid Waste</td><td>342 kg</td><td>TN-01-AB-1234</td><td><span class="status-pill pill-collected">Collected</span></td></tr>
+            <tr><td>MUN-2398</td><td>GreenEarth NGO</td><td>26 Jun 2026</td><td>Bio-degradable</td><td>180 kg</td><td>TN-09-CD-5678</td><td><span class="status-pill pill-collected">Collected</span></td></tr>
+            <tr><td>MUN-2395</td><td>Chennai Municipal Corp.</td><td>25 Jun 2026</td><td>Plastic &amp; Metal</td><td>256 kg</td><td>TN-01-EF-9012</td><td><span class="status-pill pill-collected">Collected</span></td></tr>
+            <tr><td>MUN-2390</td><td>EcoRecycle Pvt. Ltd.</td><td>24 Jun 2026</td><td>E-Waste</td><td>89 kg</td><td>TN-22-GH-3456</td><td><span class="status-pill pill-collected">Collected</span></td></tr>
+            <tr><td>MUN-2388</td><td>Tiruppur Mun. Corp.</td><td>24 Jun 2026</td><td>Medical Waste</td><td>45 kg</td><td>TN-43-IJ-7890</td><td><span class="status-pill pill-pending">Pending Pickup</span></td></tr>
+            <tr><td>MUN-2382</td><td>CleanCity Initiative</td><td>22 Jun 2026</td><td>Hazardous Mixed</td><td>122 kg</td><td>TN-11-KL-2345</td><td><span class="status-pill pill-collected">Collected</span></td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:1rem;padding:12px;background:var(--green-pale);border-radius:10px;font-size:13px;display:flex;gap:2rem">
+          <span><strong style="color:var(--green-deep)">Total Collected:</strong> 1,034 kg</span>
+          <span><strong style="color:var(--green-deep)">Organizations:</strong> 6</span>
+          <span><strong style="color:var(--amber)">Pending:</strong> 45 kg</span>
+        </div>
+      </div>
+
+      <!-- SALES TABLE -->
+      <div id="tab-sales" style="display:none">
+        <h3 style="font-size:14px;font-weight:600;color:var(--green-deep);margin-bottom:1rem"><i class="ti ti-cash"></i> Waste Sales Records</h3>
+        <table class="data-table">
+          <thead><tr><th>Sale ID</th><th>Buyer</th><th>Waste Type</th><th>Amount (kg)</th><th>Rate/kg</th><th>Total (₹)</th><th>Date</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>SL-1045</td><td>Plastico Recyclers</td><td>Plastic Waste</td><td>200 kg</td><td>₹35</td><td><strong>₹7,000</strong></td><td>27 Jun 2026</td><td><span class="status-pill pill-sold">Sold</span></td></tr>
+            <tr><td>SL-1044</td><td>MetalMax Ind.</td><td>Metal Scrap</td><td>150 kg</td><td>₹80</td><td><strong>₹12,000</strong></td><td>26 Jun 2026</td><td><span class="status-pill pill-sold">Sold</span></td></tr>
+            <tr><td>SL-1043</td><td>TechReclaim Ltd.</td><td>E-Waste</td><td>60 kg</td><td>₹120</td><td><strong>₹7,200</strong></td><td>25 Jun 2026</td><td><span class="status-pill pill-sold">Sold</span></td></tr>
+            <tr><td>SL-1042</td><td>BioFuel Corp.</td><td>Cooking Waste</td><td>300 kg</td><td>₹20</td><td><strong>₹6,000</strong></td><td>24 Jun 2026</td><td><span class="status-pill pill-sold">Sold</span></td></tr>
+            <tr><td>SL-1041</td><td>GreenCompost Co.</td><td>Bio-degradable</td><td>182 kg</td><td>₹25</td><td><strong>₹4,550</strong></td><td>23 Jun 2026</td><td><span class="status-pill pill-sold">Sold</span></td></tr>
+            <tr><td>SL-1040</td><td>Plastico Recyclers</td><td>Plastic Waste</td><td>110 kg</td><td>₹35</td><td><strong>₹3,850</strong></td><td>22 Jun 2026</td><td><span class="status-pill pill-sold">Sold</span></td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:1rem;padding:12px;background:var(--green-pale);border-radius:10px;font-size:13px;display:flex;gap:2rem;flex-wrap:wrap">
+          <span><strong style="color:var(--green-deep)">Total Sold:</strong> 1,002 kg</span>
+          <span><strong style="color:var(--green-deep)">Total Revenue:</strong> ₹40,600</span>
+          <span><strong style="color:var(--green-deep)">Balance:</strong> 721 kg in storage</span>
+        </div>
+      </div>
+
+      <!-- CUSTOMERS TABLE -->
+      <div id="tab-customers" style="display:none">
+        <h3 style="font-size:14px;font-weight:600;color:var(--green-deep);margin-bottom:1rem"><i class="ti ti-users"></i> Customer Directory — Waste Buyers</h3>
+        <table class="data-table">
+          <thead><tr><th>ID</th><th>Customer Name</th><th>Type</th><th>Contact</th><th>Waste Interest</th><th>Total Purchased</th><th>Last Purchase</th></tr></thead>
+          <tbody>
+            <tr><td>C-001</td><td><strong>Plastico Recyclers</strong></td><td><span class="status-pill pill-ok">Company</span></td><td>9876543210</td><td>Plastic, Non-Biodeg</td><td>450 kg</td><td>27 Jun 2026</td></tr>
+            <tr><td>C-002</td><td><strong>MetalMax Industries</strong></td><td><span class="status-pill pill-ok">Company</span></td><td>9876543211</td><td>Metal, E-Waste</td><td>310 kg</td><td>26 Jun 2026</td></tr>
+            <tr><td>C-003</td><td><strong>TechReclaim Ltd.</strong></td><td><span class="status-pill pill-ok">Company</span></td><td>9876543212</td><td>E-Waste</td><td>180 kg</td><td>25 Jun 2026</td></tr>
+            <tr><td>C-004</td><td><strong>BioFuel Corp.</strong></td><td><span class="status-pill pill-ok">Company</span></td><td>9876543213</td><td>Cooking, Biodeg</td><td>620 kg</td><td>24 Jun 2026</td></tr>
+            <tr><td>C-005</td><td><strong>GreenCompost Co.</strong></td><td><span class="status-pill pill-ok">Company</span></td><td>9876543214</td><td>Biodegradable</td><td>290 kg</td><td>23 Jun 2026</td></tr>
+            <tr><td>C-006</td><td><strong>Arumugam Traders</strong></td><td><span class="status-pill pill-pending">Individual</span></td><td>9876543215</td><td>Metal Scrap</td><td>95 kg</td><td>20 Jun 2026</td></tr>
+            <tr><td>C-007</td><td><strong>SafeDispose Solutions</strong></td><td><span class="status-pill pill-ok">Company</span></td><td>9876543216</td><td>Medical, Hazardous</td><td>70 kg</td><td>18 Jun 2026</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:1rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px">
+          <div style="background:var(--green-pale);border-radius:10px;padding:12px;text-align:center">
+            <div style="font-size:22px;font-weight:700;color:var(--green-deep)">18</div>
+            <div style="font-size:11px;color:var(--text-sec)">Total Customers</div>
+          </div>
+          <div style="background:#eaf4fb;border-radius:10px;padding:12px;text-align:center">
+            <div style="font-size:22px;font-weight:700;color:#2980b9">15</div>
+            <div style="font-size:11px;color:var(--text-sec)">Companies</div>
+          </div>
+          <div style="background:#fef3e2;border-radius:10px;padding:12px;text-align:center">
+            <div style="font-size:22px;font-weight:700;color:#e67e22">3</div>
+            <div style="font-size:11px;color:var(--text-sec)">Individuals</div>
+          </div>
+          <div style="background:#fef3e2;border-radius:10px;padding:12px;text-align:center">
+            <div style="font-size:22px;font-weight:700;color:#e67e22">3</div>
+            <div style="font-size:11px;color:var(--text-sec)">New This Month</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Monthly Trend Chart -->
+    <div class="chart-panel" style="margin-bottom:1.5rem">
+      <h3><i class="ti ti-trending-up" style="color:var(--green-bright)"></i> Monthly Waste Collection Trend (kg)</h3>
+      <div style="position:relative;height:220px">
+        <canvas id="trendChart" role="img" aria-label="Line chart showing monthly waste collection trend">Monthly trend chart</canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ABOUT VIEW -->
+  <div class="view" id="view-about">
+    <div class="sdg-box">
+      <div class="sdg-num">11 12</div>
+      <div class="sdg-content">
+        <h2>Sustainable Development Goals</h2>
+        <p>EcoSort AI directly supports SDG 11 (Sustainable Cities and Communities) and SDG 12 (Responsible Consumption and Production) by automating waste classification, reducing contamination, and enabling data-driven recycling decisions.</p>
+      </div>
+    </div>
+
+    <div class="about-grid">
+      <div class="about-card">
+        <h3><i class="ti ti-cpu" style="color:var(--green-bright)"></i> Computer Vision AI</h3>
+        <p>Our AI model is trained exclusively on waste images covering all 9 major waste categories. It uses image feature extraction to classify waste with high accuracy without relying on any non-waste training data.</p>
+      </div>
+      <div class="about-card">
+        <h3><i class="ti ti-activity" style="color:var(--blue)"></i> Virtual Sensor Network</h3>
+        <p>Simulated IoT sensors measure weight, moisture content, electrical conductivity, and toxicity levels. These values feed into the decision engine to confirm and refine the AI's classification result.</p>
+      </div>
+      <div class="about-card">
+        <h3><i class="ti ti-brain" style="color:var(--purple)"></i> Decision Engine</h3>
+        <p>A rule-based engine combines AI output and sensor readings to determine which bin should open. It accounts for bin capacity, hazard levels, and biodegradability to make safe routing decisions.</p>
+      </div>
+      <div class="about-card">
+        <h3><i class="ti ti-archive" style="color:var(--amber)"></i> Smart Bin System</h3>
+        <p>9 bins correspond to each waste category. The correct bin lid opens automatically upon classification, with LED indicators and audio confirmation. Full bins trigger municipality alerts.</p>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-bottom:1.5rem">
+      <h2><i class="ti ti-list-check"></i> 9 Waste Categories Supported</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin-top:1rem">
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:10px;background:var(--green-pale);border-radius:10px">
+          <span style="font-size:24px">🍳</span>
+          <div><strong style="font-size:13px">Cooking Waste</strong><br><span style="font-size:12px;color:var(--text-sec)">Food scraps, oils, kitchen organic matter. Biodegradable, non-hazardous.</span></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:10px;background:#eaf4fb;border-radius:10px">
+          <span style="font-size:24px">🧴</span>
+          <div><strong style="font-size:13px">Plastic Waste</strong><br><span style="font-size:12px;color:var(--text-sec)">Bottles, packaging, bags. Non-biodegradable, recyclable.</span></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:10px;background:#f2f3f4;border-radius:10px">
+          <span style="font-size:24px">⚙️</span>
+          <div><strong style="font-size:13px">Metal Waste</strong><br><span style="font-size:12px;color:var(--text-sec)">Cans, wires, scrap. Non-biodegradable, high recyclability value.</span></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:10px;background:#f5eef8;border-radius:10px">
+          <span style="font-size:24px">💻</span>
+          <div><strong style="font-size:13px">E-Waste</strong><br><span style="font-size:12px;color:var(--text-sec)">Electronics, batteries, cables. Contains hazardous materials, needs special handling.</span></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:10px;background:#eafaf1;border-radius:10px">
+          <span style="font-size:24px">🌿</span>
+          <div><strong style="font-size:13px">Bio-degradable Waste</strong><br><span style="font-size:12px;color:var(--text-sec)">Leaves, paper, natural fibers. Can be composted naturally.</span></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:10px;background:#fdedec;border-radius:10px">
+          <span style="font-size:24px">🚫</span>
+          <div><strong style="font-size:13px">Non-Biodegradable Waste</strong><br><span style="font-size:12px;color:var(--text-sec)">Styrofoam, certain plastics. Persists in environment, needs recycling.</span></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:10px;background:#fdf2f2;border-radius:10px">
+          <span style="font-size:24px">🏥</span>
+          <div><strong style="font-size:13px">Medical Waste</strong><br><span style="font-size:12px;color:var(--text-sec)">Syringes, bandages, expired meds. Requires special biohazard disposal.</span></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:10px;background:#fef5e7;border-radius:10px">
+          <span style="font-size:24px">⚠️</span>
+          <div><strong style="font-size:13px">Biodegradable Hazardous</strong><br><span style="font-size:12px;color:var(--text-sec)">Pesticides, certain organic chemicals. Biodegrades but is toxic.</span></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:10px;background:#eaecee;border-radius:10px">
+          <span style="font-size:24px">☣️</span>
+          <div><strong style="font-size:13px">Non-Biodegradable Hazardous</strong><br><span style="font-size:12px;color:var(--text-sec)">Industrial chemicals, heavy metals. Most dangerous — strict containment needed.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const wasteData = {
+  cooking:{label:"Cooking Waste",emoji:"🍳",type:"Biodegradable",category:"Organic / Kitchen",hazardous:false,biodegradable:true,recyclable:false,bin:0,color:"#e67e22",bg:"#fef3e2",border:"#f5cba7",instruction:"Place in green organic bin. Will be composted into biogas or fertilizer.",sensors:{weight:[80,300],moisture:[70,90],conductivity:[0.5,2],toxicity:[0,5]},confBase:92},
+  plastic:{label:"Plastic Waste",emoji:"🧴",type:"Non-Biodegradable",category:"Polymer / Packaging",hazardous:false,biodegradable:false,recyclable:true,bin:1,color:"#3498db",bg:"#eaf4fb",border:"#aed6f1",instruction:"Rinse and place in blue plastic bin. Will be sent to plastic recycling plant.",sensors:{weight:[20,150],moisture:[5,20],conductivity:[0.1,0.5],toxicity:[0,10]},confBase:89},
+  metal:{label:"Metal Waste",emoji:"⚙️",type:"Non-Biodegradable",category:"Metallic / Scrap",hazardous:false,biodegradable:false,recyclable:true,bin:2,color:"#7f8c8d",bg:"#f2f3f4",border:"#d5dbdb",instruction:"Place in gray metal bin. High conductivity triggers metal detection. Valuable scrap.",sensors:{weight:[100,500],moisture:[2,15],conductivity:[50,200],toxicity:[0,15]},confBase:94},
+  ewaste:{label:"E-Waste",emoji:"💻",type:"Hazardous / Electronic",category:"Electronic / Toxic",hazardous:true,biodegradable:false,recyclable:true,bin:3,color:"#8e44ad",bg:"#f5eef8",border:"#d7bde2",instruction:"Handle carefully. Place in purple e-waste bin. Contains lead, mercury — requires certified recycler.",sensors:{weight:[50,400],moisture:[2,10],conductivity:[10,80],toxicity:[20,60]},confBase:91},
+  biodeg:{label:"Biodegradable Waste",emoji:"🌿",type:"Biodegradable",category:"Natural / Organic",hazardous:false,biodegradable:true,recyclable:false,bin:4,color:"#27ae60",bg:"#eafaf1",border:"#a9dfbf",instruction:"Place in green bin. Suitable for composting. Can become fertilizer within 3–6 weeks.",sensors:{weight:[30,200],moisture:[40,80],conductivity:[0.3,1.5],toxicity:[0,3]},confBase:96},
+  nonbiodeg:{label:"Non-Biodegradable Waste",emoji:"🚫",type:"Non-Biodegradable",category:"Synthetic / Persistent",hazardous:false,biodegradable:false,recyclable:true,bin:5,color:"#e74c3c",bg:"#fdedec",border:"#f5b7b1",instruction:"Separate from organic waste. Place in red non-biodeg bin. Will be processed at recycling facility.",sensors:{weight:[30,250],moisture:[5,25],conductivity:[0.2,1],toxicity:[5,20]},confBase:87},
+  medical:{label:"Medical Waste",emoji:"🏥",type:"Biohazardous",category:"Healthcare / Infectious",hazardous:true,biodegradable:false,recyclable:false,bin:6,color:"#c0392b",bg:"#fdf2f2",border:"#e8b4b8",instruction:"DANGER: Place in yellow biohazard bin immediately. Do not mix with other waste. Licensed disposal required.",sensors:{weight:[10,80],moisture:[20,60],conductivity:[1,5],toxicity:[40,95]},confBase:97},
+  biohaz:{label:"Biodegradable Hazardous",emoji:"⚠️",type:"Hazardous Organic",category:"Toxic / Organic",hazardous:true,biodegradable:true,recyclable:false,bin:7,color:"#d35400",bg:"#fef5e7",border:"#f0b27a",instruction:"Orange hazard bin. Toxic organic material — requires treatment before composting. Wear gloves.",sensors:{weight:[20,150],moisture:[30,70],conductivity:[2,10],toxicity:[30,75]},confBase:85},
+  nonbiohaz:{label:"Non-Biodeg. Hazardous",emoji:"☣️",type:"Hazardous Industrial",category:"Chemical / Industrial",hazardous:true,biodegradable:false,recyclable:false,bin:8,color:"#2c3e50",bg:"#eaecee",border:"#aab7b8",instruction:"BLACK HAZARD BIN — Most dangerous category. Requires licensed chemical disposal. Do not open bin manually.",sensors:{weight:[50,300],moisture:[5,30],conductivity:[5,50],toxicity:[60,100]},confBase:90}
+};
+
+const bins = [
+  {id:0,name:"Cooking",emoji:"🍳",color:"#e67e22",level:45},
+  {id:1,name:"Plastic",emoji:"🧴",color:"#3498db",level:62},
+  {id:2,name:"Metal",emoji:"⚙️",color:"#7f8c8d",level:30},
+  {id:3,name:"E-Waste",emoji:"💻",color:"#8e44ad",level:85},
+  {id:4,name:"Biodeg.",emoji:"🌿",color:"#27ae60",level:55},
+  {id:5,name:"Non-Bio",emoji:"🚫",color:"#e74c3c",level:40},
+  {id:6,name:"Medical",emoji:"🏥",color:"#c0392b",level:92},
+  {id:7,name:"Bio-Haz",emoji:"⚠️",color:"#d35400",level:20},
+  {id:8,name:"Chem-Haz",emoji:"☣️",color:"#2c3e50",level:80}
+];
+
+let hasImage = false;
+let stream = null;
+
+function renderBins(activeBin=-1){
+  const grid = document.getElementById('binsGrid');
+  grid.innerHTML = bins.map((b,i)=>{
+    const isActive = i===activeBin;
+    const fullClass = b.level>80?'pill-full':b.level>60?'pill-warn':'pill-ok';
+    const fullLabel = b.level>80?'FULL':'OK';
+    return `<div class="bin-card ${isActive?'active opening':''}" id="bin-${i}">
+      <span class="bin-icon">${b.emoji}</span>
+      <div class="bin-name" style="color:${b.color}">${b.name}</div>
+      <div class="bin-level">${b.level}% full</div>
+      <div class="bin-progress"><div class="bin-fill" style="width:${b.level}%;background:${b.color}"></div></div>
+      <span class="bin-status ${fullClass}">${isActive?'OPEN ✓':fullLabel}</span>
+    </div>`;
+  }).join('');
+}
+renderBins();
+
+function handleFileUpload(e){
+  const file = e.target.files[0];
+  if(!file)return;
+  const reader = new FileReader();
+  reader.onload = ev=>{
+    document.getElementById('previewImg').src=ev.target.result;
+    document.getElementById('previewArea').style.display='block';
+    hasImage=true;
+    document.getElementById('analyzeBtn').disabled=false;
+    showNotif('Image loaded — ready to analyze');
+  };
+  reader.readAsDataURL(file);
+}
+
+async function openCamera(){
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+    document.getElementById('videoEl').srcObject=stream;
+    document.getElementById('camModal').classList.add('open');
+  }catch(e){
+    showNotif('Camera not available — please upload an image');
+  }
+}
+function closeCamera(){
+  if(stream)stream.getTracks().forEach(t=>t.stop());
+  document.getElementById('camModal').classList.remove('open');
+}
+function capturePhoto(){
+  const video=document.getElementById('videoEl');
+  const canvas=document.createElement('canvas');
+  canvas.width=video.videoWidth;canvas.height=video.videoHeight;
+  canvas.getContext('2d').drawImage(video,0,0);
+  const dataUrl=canvas.toDataURL('image/jpeg');
+  document.getElementById('previewImg').src=dataUrl;
+  document.getElementById('previewArea').style.display='block';
+  hasImage=true;
+  document.getElementById('analyzeBtn').disabled=false;
+  closeCamera();
+  showNotif('Photo captured — ready to analyze');
+}
+
+async function analyzeWaste(){
+  if(!hasImage){showNotif('Please upload or capture an image first');return;}
+  const btn=document.getElementById('analyzeBtn');
+  btn.disabled=true;
+  document.getElementById('loadingAI').classList.add('show');
+  document.getElementById('noResult').style.display='none';
+  document.getElementById('resultCard').style.display='none';
+  renderBins();
+
+  // Simulate AI + sensor delay
+  await sleep(2200);
+
+  // Pick random waste type (simulated AI result)
+  const types=Object.keys(wasteData);
+  const picked=types[Math.floor(Math.random()*types.length)];
+  const d=wasteData[picked];
+
+  // Show result
+  document.getElementById('loadingAI').classList.remove('show');
+  const card=document.getElementById('resultCard');
+  card.style.display='block';
+  card.style.background=d.bg;
+  card.style.borderColor=d.border;
+
+  document.getElementById('typeBadge').innerHTML=`${d.emoji} ${d.label}`;
+  document.getElementById('typeBadge').style.background=d.bg;
+  document.getElementById('typeBadge').style.color=d.color;
+  document.getElementById('typeBadge').style.border=`1.5px solid ${d.border}`;
+
+  document.getElementById('resCategory').textContent=d.category;
+  document.getElementById('resHazard').innerHTML=d.hazardous?'<span style="color:#e74c3c;font-weight:700">⚠ YES — Handle with care</span>':'<span style="color:#27ae60">✓ No</span>';
+  document.getElementById('resBio').textContent=d.biodegradable?'✓ Yes':'✗ No';
+  document.getElementById('resRecycle').textContent=d.recyclable?'✓ Yes':'✗ No';
+
+  const conf=d.confBase+Math.floor(Math.random()*6)-2;
+  document.getElementById('resConf').textContent=conf+'%';
+  setTimeout(()=>{document.getElementById('confFill').style.width=conf+'%';document.getElementById('confFill').style.background=d.color;},100);
+  document.getElementById('resInstruction').textContent=d.instruction;
+
+  // Sensors
+  function rnd(min,max){return Math.floor(Math.random()*(max-min)+min)}
+  const s=d.sensors;
+  const wVal=rnd(s.weight[0],s.weight[1]);
+  const mVal=rnd(s.moisture[0],s.moisture[1]);
+  const cVal=parseFloat((Math.random()*(s.conductivity[1]-s.conductivity[0])+s.conductivity[0]).toFixed(1));
+  const tVal=rnd(s.toxicity[0],s.toxicity[1]);
+  document.getElementById('sWeight').innerHTML=wVal+' <span class="sensor-unit">g</span>';
+  document.getElementById('sMoist').innerHTML=mVal+' <span class="sensor-unit">%</span>';
+  document.getElementById('sCond').innerHTML=cVal+' <span class="sensor-unit">mS</span>';
+  document.getElementById('sTox').innerHTML=tVal+' <span class="sensor-unit">ppm</span>';
+  setTimeout(()=>{
+    document.getElementById('sWeightBar').style.width=Math.min(wVal/500*100,100)+'%';
+    document.getElementById('sMoistBar').style.width=mVal+'%';
+    document.getElementById('sCondBar').style.width=Math.min(cVal/200*100,100)+'%';
+    document.getElementById('sToxBar').style.width=Math.min(tVal,100)+'%';
+    if(tVal>50)document.getElementById('sToxBar').style.background='#e74c3c';
+  },200);
+
+  // Open correct bin
+  renderBins(d.bin);
+  bins[d.bin].level=Math.min(bins[d.bin].level+5,99);
+
+  btn.disabled=false;
+  showNotif(`${d.emoji} ${d.label} detected — Bin ${d.bin+1} opened!`);
+}
+
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+
+function showView(id, btn){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  btn.classList.add('active');
+  if(id==='dashboard'){initCharts();}
+}
+
+function showTab(id, btn){
+  document.querySelectorAll('[id^="tab-"]').forEach(t=>t.style.display='none');
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).style.display='block';
+  btn.classList.add('active');
+}
+
+let chartsInited=false;
+function initCharts(){
+  if(chartsInited)return;
+  chartsInited=true;
+
+  // Waste by type bar
+  new Chart(document.getElementById('wasteTypeChart'),{
+    type:'bar',
+    data:{
+      labels:['Cooking','Plastic','Metal','E-Waste','Biodeg.','Non-Bio','Medical','Bio-Haz','Chem-Haz'],
+      datasets:[{
+        label:'kg collected',
+        data:[420,380,310,180,290,260,95,60,72],
+        backgroundColor:['#e67e22','#3498db','#7f8c8d','#8e44ad','#27ae60','#e74c3c','#c0392b','#d35400','#2c3e50'],
+        borderRadius:6,borderSkipped:false
+      }]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{
+      x:{grid:{display:false},ticks:{font:{size:11}}},
+      y:{grid:{color:'#f0f0f0'},ticks:{callback:v=>v+' kg'}}
+    }}
+  });
+
+  // Disposal donut
+  new Chart(document.getElementById('disposalChart'),{
+    type:'doughnut',
+    data:{
+      labels:['Municipality','Sold','In Storage','Composted'],
+      datasets:[{data:[1234,892,721,450],backgroundColor:['#3182ce','#27ae60','#f59e0b','#8e44ad'],hoverOffset:8,borderWidth:3,borderColor:'#fff'}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11},padding:12,usePointStyle:true,pointStyle:'rect'}}}}
+  });
+
+  // Trend line
+  new Chart(document.getElementById('trendChart'),{
+    type:'line',
+    data:{
+      labels:['Jan','Feb','Mar','Apr','May','Jun'],
+      datasets:[
+        {label:'Total Collected',data:[1800,2100,1950,2400,2650,2847],borderColor:'#27ae60',backgroundColor:'rgba(39,174,96,0.1)',fill:true,tension:0.4,pointRadius:4,pointBackgroundColor:'#27ae60'},
+        {label:'Sold',data:[600,720,700,820,850,892],borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,0.1)',fill:true,tension:0.4,pointRadius:4,pointBackgroundColor:'#f59e0b'}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{usePointStyle:true,font:{size:12}}}},scales:{
+      y:{grid:{color:'#f0f0f0'},ticks:{callback:v=>v+' kg'}},x:{grid:{display:false}}
+    }}
+  });
+}
+
+function refreshDashboard(){
+  showNotif('Dashboard refreshed — data up to date');
+}
+
+function showNotif(msg){
+  const n=document.getElementById('notif');
+  document.getElementById('notifMsg').textContent=msg;
+  n.classList.add('show');
+  setTimeout(()=>n.classList.remove('show'),3000);
+}
+
+// Drag and drop
+const zone=document.getElementById('uploadZone');
+zone.addEventListener('dragover',e=>{e.preventDefault();zone.style.background='#c1f0d5'});
+zone.addEventListener('dragleave',()=>{zone.style.background=''});
+zone.addEventListener('drop',e=>{
+  e.preventDefault();zone.style.background='';
+  const file=e.dataTransfer.files[0];
+  if(file&&file.type.startsWith('image/')){
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      document.getElementById('previewImg').src=ev.target.result;
+      document.getElementById('previewArea').style.display='block';
+      hasImage=true;
+      document.getElementById('analyzeBtn').disabled=false;
+      showNotif('Image dropped — ready to analyze');
+    };
+    reader.readAsDataURL(file);
+  }
+});
+</script>
+</body>
+</html>
